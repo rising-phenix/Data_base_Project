@@ -4,18 +4,19 @@ body {
     min-height: 70vh;
     background-color: #e8f4f8;
     background-image:
-        /* Dark navy orb on the left */
-        radial-gradient(ellipse 80% 80% at 15% 60%,
-            rgba(2, 8, 35, 1) 20%,
-            rgba(0, 20, 80, 0.95) 30%,
-            rgba(0, 80, 180, 0.6) 55%,
-            transparent 75%
+        radial-gradient(ellipse 40% 70% at 20% 60%,
+            rgba(0, 0, 0, 1) 10%,
+            rgba(5, 10, 40, 1) 25%,
+            rgba(0, 40, 120, 0.8) 50%,
+            rgba(0, 120, 255, 0.5) 70%,
+            transparent 90%
         ),
-        /* Cyan/teal wash across the whole section */
-        linear-gradient(135deg,
-            rgba(0, 150, 220, 0.9) 0%,
-            rgba(30, 180, 230, 0.7) 40%,
-            rgba(200, 235, 245, 0.5) 70%,
+        linear-gradient(90deg,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(255, 255, 255, 0.9) 8%,
+            rgba(0, 80, 180, 0.8) 40%,
+            rgba(30, 180, 230, 1) 70%,
+            rgba(255, 255, 255, 0.9) 92%,
             rgba(255, 255, 255, 1) 100%
         );
     background-attachment: fixed;
@@ -24,7 +25,7 @@ body {
 
 .top-part {
     display: flex;
-    height: 60vh;
+    height: 80vh;
     min-height: 300px;
     width: 100%;
     position: relative;
@@ -32,16 +33,32 @@ body {
     background: transparent;
 }
 
+
 .navbar {
+    display: flex;
     justify-content: space-between;
     position: absolute;
     top: 0;
     right: 0;
-    padding-right: 20px ;
-    padding-top: 20px;
+    left: 40px;
+    padding: 20px 24px;
+    align-items: center;
 }
 
-.navbar a {
+.nav-side {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 450;
+    color: #1a1a1a;
+    letter-spacing: 0.05em;
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
     text-decoration: none;
     font-family: 'Playfair Display', serif;
     font-size: 17px;
@@ -49,7 +66,6 @@ body {
     letter-spacing: .05em;
     color: #1a1a1a;
     transition: opacity 0.3s ease;
-    margin-left: 25px;
 }
 
 .navbar a:hover {
@@ -83,4 +99,108 @@ body {
     color: rgba(249, 247, 244, .8);
     font-size: 1.1rem;
     font-style: italic;
+}
+
+.flash-cards {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(245, 245, 240, 1);
+    /* backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(8px); */
+}
+
+.flash-cards h2 {
+    margin-top: 2rem;
+    margin-bottom: 4rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.7rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    align-self: center;
+}
+
+.panel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2.2rem;
+    margin-top: 0rem;
+    margin-bottom: 1rem;
+}
+
+.card {
+    background: #fff;
+    border: 0.5px solid #ddd;
+    border-radius: 10px;
+    width: 280px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-img {
+    width: 100%;
+    height: 160px;
+    position: relative;
+    overflow: hidden;
+    background: #eee;
+}
+
+.card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.category-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: white;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 3px;
+    color: #333;
+}
+
+.card-body {
+    padding: 1.2rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.35;
+}
+
+.card-desc {
+    font-size: 0.88rem;
+    color: #666;
+    font-style: italic;
+}
+
+.card-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #e05c4b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
 }
