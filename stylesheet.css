@@ -107,8 +107,6 @@ body {
     justify-content: center;
     align-items: center;
     background: rgba(245, 245, 240, 1);
-    /* backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(8px); */
 }
 
 .flash-cards h2 {
