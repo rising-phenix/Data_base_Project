@@ -254,8 +254,7 @@ body {
     flex-direction: column;
     align-items: center;
     padding: 4rem 2rem;
-    background: #fff;
-}
+    background: rgba(245, 245, 240, 1);}
 
 .categories-section h2 {
     font-family: 'Playfair Display', serif;
@@ -533,8 +532,12 @@ body {
     }
     
     .category-card {
-        width: 130px;
+        width: calc(50% - 0.5rem);
         padding: 0 0.8rem 1.2rem 0.8rem;
+    }
+
+    .categories-panel {
+        gap: 1rem;
     }
 
     .footer-above {
