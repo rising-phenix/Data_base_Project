@@ -148,6 +148,7 @@ body {
 }
 
 .flash-cards {
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -250,10 +251,11 @@ body {
 }
 
 .categories-section {
+    border-top: 1px solid #ddd;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 4rem 2rem;
+    padding: 2rem 2rem;
     background: rgba(245, 245, 240, 1);}
 
 .categories-section h2 {
@@ -339,7 +341,7 @@ body {
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     font-size: 2rem;
-    color: wheat;
+    color: #e0f0ff;
     flex-wrap: wrap;
 }
 
@@ -531,13 +533,31 @@ body {
         font-weight: 650;
     }
     
-    .category-card {
-        width: calc(50% - 0.5rem);
-        padding: 0 0.8rem 1.2rem 0.8rem;
+    .categories-section {
+        padding: 3rem 2rem;
     }
-
+    
     .categories-panel {
-        gap: 1rem;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        width: 100%;
+    }
+    
+    .category-card {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0 0.6rem 1rem 0.6rem;
+    }
+    
+    .cat-icon {
+        height: 80px;
+        margin: 0 -0.6rem 0.5rem -0.6rem;
+        width: calc(100% + 1.2rem);
+    }
+    
+    .cat-name {
+        font-size: 0.95rem;
     }
 
     .footer-above {
