@@ -9,6 +9,22 @@
             rel="stylesheet">
         <link rel = "stylesheet" href = "stylesheet.css">
     </head>
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const mobileNav = document.getElementById('mobile-nav');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('open');
+            mobileNav.classList.toggle('open');
+        });
+
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('open');
+                mobileNav.classList.remove('open');
+            });
+        });
+    </script>
     <body>
         <section class = "top-part">
             <div class = "navbar">
@@ -19,7 +35,19 @@
                     <a href="about.html">About</a>
                     <a href="index.html">Terms & conditions</a>
                 </div>
+                <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
+            <div class="mobile-nav" id="mobile-nav">
+                <a href="index.html">Home</a>
+                <a href="email.html">Contact</a>
+                <a href="about.html">About</a>
+                <a href="index.html">Terms & conditions</a>
+            </div>
+
             <div class = "blog-heading">
                 <h1>Daily Blog</h1>
                 <p>For blogs that make you feel alive</p>
@@ -90,14 +118,18 @@
                 </div>
                 <div class="footer-col">
                     <h3>Navigation</h3>
-                    <a href="index.html">Home</a>
-                    <a href="email.html">Contact</a>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="email.html">Contact</a></li>
+                    </ul>
                 </div>
                     <div class="footer-col">
                     <h3>Information</h3>
-                    <a href="about.html">About</a>
-                    <a href="termsandconditions.html">Terms and conditions</a>
-                    <a href = "https://www.linkedin.com/in/huzaifa-jamil-in" target="_blank">Creator</a>
+                    <ul>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="termsandconditions.html">Terms and conditions</a></li>
+                        <li><a href="https://www.linkedin.com/in/huzaifa-jamil-in" target="_blank">Creator</a></li>
+                    </ul>
                 </div>
                 <div class="footer-col">
                     <h3>Leave a comment</h3>
@@ -106,6 +138,7 @@
                         <button>Enter</button>
                     </div>
                     <div class="socials">
+                        <h3>Socials</h3>
                         <a href = "https://www.linkedin.com/in/huzaifa-jamil-in" target="_blank">In</a>
                     </div>
                 </div>
