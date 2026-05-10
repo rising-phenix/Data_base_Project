@@ -324,7 +324,7 @@ body {
     color: #666;
 }
 
-@media (max-width = 768px) {
+@media (max-width: 768px) {
     body {
         min-height: 50vh;
     }
