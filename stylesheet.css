@@ -326,11 +326,12 @@ body {
 
 @media (max-width: 768px) {
     body {
-        min-height: 50vh;
+        min-height: 20vh;
     }
 
     .top-part {
-        height: 40vh;
+        height: 50vh;
         min-height: 250px;
+        font-size: 40px;
     }
 }
