@@ -249,6 +249,82 @@ body {
     text-decoration: none;
 }
 
+.categories-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4rem 2rem;
+    background: #fff;
+}
+
+.categories-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.7rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-top: 0;
+    margin-bottom: 3rem;
+}
+
+.categories-panel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    max-width: 1100px;
+    width: 100%;
+}
+
+.category-card {
+    background: #fff;
+    border: 0.5px solid #ddd;
+    border-radius: 10px;
+    width: 160px;
+    padding: 0 1rem 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.1);
+}
+
+.cat-icon {
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+    margin: -2rem -1rem 0.5rem -1rem;
+    width: calc(100% + 2rem);
+}
+
+.cat-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cat-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.cat-count {
+    font-size: 0.8rem;
+    color: #e05c4b;
+    font-weight: 600;
+}
+
 .site-footer {
     background: #f8f8f8;
     padding-top: 0.5rem;
@@ -410,12 +486,6 @@ body {
         color: rgba(255, 255, 255, 0.9);   
     }
 
-    .flash-cards h2 {
-        margin-bottom: 3rem;
-        font-size: 2.0rem;
-        font-weight: 650;
-    }
-
     .nav-links {
         display: none;
     }
@@ -448,5 +518,27 @@ body {
         font-size: 21px;
         font-weight: 450;
         margin-left: 8px;
+    }
+
+    .flash-cards h2 {
+        margin-bottom: 3rem;
+        font-size: 2.0rem;
+        font-weight: 650;
+    }
+
+    .categories-section h2 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        font-weight: 650;
+    }
+    
+    .category-card {
+        width: 130px;
+        padding: 0 0.8rem 1.2rem 0.8rem;
+    }
+
+    .footer-above {
+        font-size: 1.1rem;
+        padding: 1.5rem 1rem;
     }
 }
