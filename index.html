@@ -9,22 +9,6 @@
             rel="stylesheet">
         <link rel = "stylesheet" href = "stylesheet.css">
     </head>
-    <script>
-        const hamburger = document.getElementById('hamburger');
-        const mobileNav = document.getElementById('mobile-nav');
-
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('open');
-            mobileNav.classList.toggle('open');
-        });
-
-        mobileNav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('open');
-                mobileNav.classList.remove('open');
-            });
-        });
-    </script>
     <body>
         <section class = "top-part">
             <div class = "navbar">
@@ -41,18 +25,17 @@
                     <span></span>
                 </button>
             </div>
-            <div class="mobile-nav" id="mobile-nav">
-                <a href="index.html">Home</a>
-                <a href="email.html">Contact</a>
-                <a href="about.html">About</a>
-                <a href="index.html">Terms & conditions</a>
-            </div>
-
             <div class = "blog-heading">
                 <h1>Daily Blog</h1>
                 <p>For blogs that make you feel alive</p>
             </div>
         </section>
+        <div class="mobile-nav" id="mobile-nav">
+            <a href="index.html">Home</a>
+            <a href="email.html">Contact</a>
+            <a href="about.html">About</a>
+            <a href="index.html">Terms & conditions</a>
+        </div>
         <div class = "flash-cards">
             <h2>Most Popular</h2>
                 <div class="panel">
@@ -148,4 +131,20 @@
             </div>
         </footer>
     </body>
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const mobileNav = document.getElementById('mobile-nav');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('open');
+            mobileNav.classList.toggle('open');
+        });
+
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('open');
+                mobileNav.classList.remove('open');
+            });
+        });
+    </script>
 </html>
