@@ -426,4 +426,8 @@ body {
     .navbar {
         left: 10px;
     }
+    .nav-side {
+        font-size: 21px;
+        font-weight: 450;        
+    }
 }
