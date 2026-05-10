@@ -326,8 +326,6 @@ body {
 
 @media (max-width = 768px) {
     body {
-        min-height: 100dvh;
-        background-attachment: scroll;
-            
+        min-height: 70vh;
     }
 }
