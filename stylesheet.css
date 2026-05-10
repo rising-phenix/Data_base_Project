@@ -464,9 +464,126 @@ body {
     color: #666;
 }
 
+.blog-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 17px;
+    background: transparent;
+    position: relative;
+    z-index: 100;
+}
+
+.blog-page {
+    max-width: 780px;
+    margin: 2rem auto;
+    padding: 3rem 3.5rem;
+    font-family: Georgia, serif;
+    font-size: 1rem;
+    color: #222;
+    line-height: 1.8;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+
+.blog-meta {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 2rem;
+    font-family: 'Playfair Display', serif;
+}
+
+.blog-meta a {
+    color: #064e96;
+    text-decoration: none;
+}
+
+.blog-meta a:hover {
+    text-decoration: underline;
+}
+
+.blog-page h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.blog-page h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0452a0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.blog-page p {
+    margin-bottom: 1.2rem;
+}
+
+.blog-page strong {
+    font-weight: 700;
+}
+
+.blog-img {
+    width: 100%;
+    height: 380px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #bbb;
+    width: 120px;
+    margin: 2rem auto;
+}
+
+.blog-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem 0;
+    border-top: 1px solid #ddd;
+    margin-top: 3rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+}
+
+.blog-footer-nav a {
+    color: #1a6fc4;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.blog-footer-nav a:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 768px) {
     body {
         min-height: 20vh;
+    }
+
+    .blog-page {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+        border-radius: 8px;
+    }
+    
+    .blog-page h1 {
+        font-size: 1.5rem;
+    }
+    
+    .blog-img {
+        height: 220px;
     }
 
     .top-part {

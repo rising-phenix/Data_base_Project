@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Title - Tech Loft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../stylesheet.css">
+</head>
+<body>
+    <div class="blog-navbar">
+        <div class="nav-side"><a href="../index.html" style="text-decoration:none; color: inherit;">Tech Loft</a></div>
+        <div class="nav-links">
+            <a href="../index.html">Home</a>
+            <a href="../email.html">Contact</a>
+            <a href="../about.html">About</a>
+            <a href="../termsandconditions.html">Terms and conditions</a>
+        </div>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+    <div class="mobile-nav" id="mobile-nav">
+        <a href="../index.html">Home</a>
+        <a href="../email.html">Contact</a>
+        <a href="../about.html">About</a>
+        <a href="../termsandconditions.html">Terms and conditions</a>
+    </div>
+    <div class="blog-page">
+        <h1>Anthropic's Mythos: The Rise of AI in Cyber Security or Hacking?</h1>
+        <div class="blog-meta">
+            <a href="#">Like Blog</a> |
+            <a href="../category/artificalintelligence_category.html">Artificial Intelligence</a>
+        </div>
+        <p>
+            With the launch of Claude Mythos, the world of cybersecurity is changing fast.
+            A single hacker now has access to more sophisticated tools than ever before
+            and the line between AI-powered defense and AI-powered offense has never been thinner.
+        </p>
+        <img class="blog-img" src="../resources/ai.jfif" alt="Artificial Intelligence">
+        <hr class="divider">
+        <h2>The Double-Edged Sword of AI</h2>
+        <p>
+            Artificial intelligence has always been a tool and like any tool, its impact depends
+            entirely on who is holding it. Claude Mythos represents one of the most capable AI
+            systems released to the public, and with that capability comes both enormous promise
+            and serious risk.
+        </p>
+        <p>
+            Security researchers have already begun testing its limits. In controlled environments,
+            Mythos has demonstrated the ability to identify vulnerabilities in code, suggest
+            exploits, and even draft phishing emails that bypass traditional filters.
+        </p>
+        <hr class="divider">
+        <h2>What This Means for Cybersecurity</h2>
+        <p>
+            For defenders, AI is a powerful ally. It can scan millions of lines of code in seconds,
+            detect anomalies in network traffic, and predict attack vectors before they are exploited.
+            Companies like CrowdStrike and Palo Alto Networks are already integrating large language
+            models into their security stacks.
+        </p>
+        <p>
+            But for attackers, the same technology lowers the barrier to entry dramatically.
+            Someone with minimal technical knowledge can now ask an AI to help them craft a
+            convincing social engineering attack or find weaknesses in a target system.
+            <strong>The democratization of hacking is real and it is accelerating.</strong>
+        </p>
+        <hr class="divider">
+        <h2>Anthropic's Response</h2>
+        <p>
+            Anthropic has been vocal about safety. Claude is built with constitutional AI principles
+            designed to refuse harmful requests. But no system is perfect, and the cat and mouse
+            game between AI safety teams and adversarial users is ongoing.
+        </p>
+        <p>
+            The question is not whether AI will be used for hacking, it already is.
+            The question is whether the defenders can stay ahead of the attackers.
+            <strong>So far, the race is too close to call.</strong>
+        </p>
+        <hr class="divider">
+        <div class="blog-footer-nav">
+            <a href="../category/artificalintelligence_category.html">← Category</a>
+            <a href="blog2.html">Next Blog →</a>
+        </div>
+
+    </div>
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <h2>Daily Blog</h2>
+                <p>Cutting-edge insights on AI, design, and marketing. Built for thinkers, creators, and doers.</p>
+                <a href="../about.html">About Us</a>
+            </div>
+            <div class="footer-col">
+                <h3>Navigation</h3>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../email.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Information</h3>
+                <ul>
+                    <li><a href="../about.html">About</a></li>
+                    <li><a href="../termsandconditions.html">Terms and conditions</a></li>
+                    <li><a href="https://www.linkedin.com/in/huzaifa-jamil-in" target="_blank">Creator</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Leave a comment</h3>
+                <div class="comment-box">
+                    <input type="text" placeholder="Enter your comment">
+                    <button>Enter</button>
+                </div>
+                <div class="socials">
+                    <h3>Socials</h3>
+                    <a href="https://www.linkedin.com/in/huzaifa-jamil-in" target="_blank">In</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            Designed with ❤️ by Huzaifa Jamil
+        </div>
+    </footer>
+
+</body>
+
+<script>
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        mobileNav.classList.toggle('open');
+    });
+
+    mobileNav.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('open');
+            mobileNav.classList.remove('open');
+        });
+    });
+</script>
+
+</html>
