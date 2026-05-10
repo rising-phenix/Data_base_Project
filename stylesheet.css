@@ -334,4 +334,10 @@ body {
         min-height: 250px;
         font-size: 40px;
     }
+
+    .flash-cards h2 {
+        margin-bottom: 3rem;
+        font-size: 2.0rem;
+        font-weight: 500;
+    }
 }
