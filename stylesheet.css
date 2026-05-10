@@ -323,3 +323,11 @@ body {
     font-size: 0.85rem;
     color: #666;
 }
+
+@media (max-width = 768px) {
+    body {
+        min-height: 100dvh;
+        background-attachment: scroll;
+            
+    }
+}
