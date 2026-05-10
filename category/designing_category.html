@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Designing - Tech Loft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../stylesheet.css">
+</head>
+
+<body>
+    <section class="top-part">
+        <div class="navbar">
+            <div class="nav-side">Tech Loft</div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="../email.html">Contact</a>
+                <a href="../about.html">About</a>
+                <a href="../termsandconditions.html">Terms and conditions</a>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="blog-heading">
+            <h1>Designing</h1>
+            <p>Where creativity meets code and pixels tell stories</p>
+        </div>
+    </section>
+
+    <div class="mobile-nav" id="mobile-nav">
+        <a href="../index.html">Home</a>
+        <a href="../email.html">Contact</a>
+        <a href="../about.html">About</a>
+        <a href="../termsandconditions.html">Terms and conditions</a>
+    </div>
+
+    <div class="flash-cards">
+        <h2>Our Articles</h2>
+        <div class="panel">
+            <div class="card">
+                <div class="card-img">
+                    <img src="../resources/designing.jfif" alt="card image">
+                    <span class="category-badge">Designing</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">Figma Faces Pressure After Claude Design Launch</div>
+                    <div class="card-desc">Figma is under pressure as automation starts handling layout, ideation, and UI generation faster than ever.
+                    </div>
+                    <a class="card-link" href="../blogs/blog3.html">Read More</a>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-img">
+                    <img src="../resources/ai.jfif" alt="card image">
+                    <span class="category-badge">Designing</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">Your Second AI Blog Title Here</div>
+                    <div class="card-desc">A short description of your second AI article goes here.</div>
+                    <a class="card-link" href="../blogs/blog4.html">Read More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <h2>Daily Blog</h2>
+                <p>Cutting-edge insights on AI, design, and marketing. Built for thinkers, creators, and doers.</p>
+                <a href="../about.html">About Us</a>
+            </div>
+            <div class="footer-col">
+                <h3>Navigation</h3>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../email.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Information</h3>
+                <ul>
+                    <li><a href="../about.html">About</a></li>
+                    <li><a href="../termsandconditions.html">Terms and conditions</a></li>
+                    <li><a href="https://www.linkedin.com/in/huzaifa-jamil-in" target="_blank">Creator</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Leave a comment</h3>
+                <div class="comment-box">
+                    <input type="text" placeholder="Enter your comment">
+                    <button>Enter</button>
+                </div>
+                <div class="socials">
+                    <h3>Socials</h3>
+                    <a href="https://www.linkedin.com/in/huzaifa-jamil-in" target="_blank">In</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            Designed with ❤️ by Huzaifa Jamil
+        </div>
+    </footer>
+</body>
+
+<script>
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        mobileNav.classList.toggle('open');
+    });
+
+    mobileNav.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('open');
+            mobileNav.classList.remove('open');
+        });
+    });
+</script>
+
+</html>
