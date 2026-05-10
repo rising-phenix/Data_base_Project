@@ -439,10 +439,12 @@ body {
     }
 
     .navbar {
-        left: 10px;
+        left: 0;
+        padding: 16px 16px;
     }
     .nav-side {
         font-size: 21px;
-        font-weight: 450;        
+        font-weight: 450;
+        margin-left: 8px;
     }
 }
