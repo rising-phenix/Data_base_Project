@@ -176,6 +176,8 @@ body {
 }
 
 .card {
+    text-decoration: none;
+    color: inherit;
     background: #fff;
     border: 0.5px solid #ddd;
     border-radius: 10px;
