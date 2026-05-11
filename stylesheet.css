@@ -33,14 +33,16 @@ body {
     background: transparent;
 }
 
+.top-part .navbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
 
 .navbar {
     display: flex;
     justify-content: space-between;
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 40px;
     padding: 20px 24px;
     align-items: center;
 }
@@ -51,6 +53,7 @@ body {
     font-weight: 450;
     color: #1a1a1a;
     letter-spacing: 0.05em;
+    padding-left: 16px;
 }
 
 .nav-links {
@@ -464,16 +467,6 @@ body {
     border-top: 1px solid #ddd;
     font-size: 0.85rem;
     color: #666;
-}
-
-.blog-navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 17px;
-    background: transparent;
-    position: relative;
-    z-index: 100;
 }
 
 .blog-page {
