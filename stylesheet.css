@@ -149,6 +149,7 @@ body {
 }
 
 .flash-cards {
+    border-bottom: 1px solid #ddd;
     padding: 1rem;
     display: flex;
     flex-direction: column;
@@ -254,7 +255,6 @@ body {
 }
 
 .categories-section {
-    border-top: 1px solid #ddd;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -331,7 +331,7 @@ body {
 }
 
 .site-footer {
-    background: #f8f8f8;
+    background: rgba(245, 245, 240, 1);
     padding-top: 0.5rem;
     font-family: 'Playfair Display', serif;
 }
@@ -476,7 +476,7 @@ body {
     font-size: 1rem;
     color: #222;
     line-height: 1.8;
-    background: #ffffff;
+    background: rgb(255, 255, 254);
     border-radius: 4px;
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
 }
@@ -631,6 +631,7 @@ body {
         font-size: 21px;
         font-weight: 450;
         margin-left: 8px;
+        padding-left: 0;
     }
 
     .flash-cards h2 {
