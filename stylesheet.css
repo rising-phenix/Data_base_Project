@@ -339,6 +339,7 @@ body {
 .footer-above {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 3rem;
     padding: 2rem 1rem;
     background: transparent;
