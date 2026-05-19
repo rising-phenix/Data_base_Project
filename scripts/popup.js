@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
-    sessionStorage.removeItem("termsAccepted");
-
     const accepted = sessionStorage.getItem("termsAccepted");
+
     if (!accepted) {
         showConsentPopup();
+    } else {
+        VisitorTracker.start();
     }
 });
 
@@ -61,7 +62,9 @@ function showConsentPopup() {
 
     document.getElementById("consent-agree").addEventListener("click", function () {
         sessionStorage.setItem("termsAccepted", "true");
-        VisitorTracker.start();
+        if (window.VisitorTracker) {
+            VisitorTracker.start();
+        }
         overlay.remove();
     });
 
