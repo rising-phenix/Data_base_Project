@@ -61,6 +61,7 @@ function showConsentPopup() {
 
     document.getElementById("consent-agree").addEventListener("click", function () {
         sessionStorage.setItem("termsAccepted", "true");
+        VisitorTracker.start();
         overlay.remove();
     });
 
