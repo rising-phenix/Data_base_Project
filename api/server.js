@@ -30,6 +30,10 @@ app.use(
 
 app.use(express.json({ limit: "1mb" }));
 
+app.get("/", (_req, res) => {
+  res.send("Tracker API is running");
+});
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
