@@ -2,12 +2,14 @@
     "use strict";
 
     var SESSION_ID_KEY = "visitorSessionId";
+    var VISITOR_ID_KEY = "visitorId";
     var TERMS_KEY = "termsAccepted";
     var ENTRY_AT_KEY = "visitorEntryAt";
 
     var state = {
         started: false,
         sessionId: null,
+        visitorId: null,
         entryAt: null,
         currentPage: null,
         pendingClicks: [],
@@ -52,6 +54,14 @@
         return "index.html";
     }
 
+    function termsUrl() {
+        var path = window.location.pathname;
+        if (path.indexOf("/blogs/") !== -1 || path.indexOf("/category/") !== -1) {
+            return "../termsandconditions.html";
+        }
+        return "termsandconditions.html";
+    }
+
     function getOrCreateSessionId() {
         var id = sessionStorage.getItem(SESSION_ID_KEY);
         if (!id) {
@@ -59,6 +69,25 @@
                 ? crypto.randomUUID()
                 : "sess-" + Date.now() + "-" + Math.random().toString(36).slice(2, 11);
             sessionStorage.setItem(SESSION_ID_KEY, id);
+        }
+        return id;
+    }
+
+    // Persists across sessions in localStorage so the same physical visitor
+    // is recognised on future visits (unlike sessionId which resets each tab).
+    function getOrCreateVisitorId() {
+        var id;
+        try {
+            id = localStorage.getItem(VISITOR_ID_KEY);
+            if (!id) {
+                id = typeof crypto !== "undefined" && crypto.randomUUID
+                    ? crypto.randomUUID()
+                    : "visitor-" + Date.now() + "-" + Math.random().toString(36).slice(2, 11);
+                localStorage.setItem(VISITOR_ID_KEY, id);
+            }
+        } catch (e) {
+            // localStorage blocked (private browsing etc.) — fall back to session-scoped id
+            id = "visitor-" + getOrCreateSessionId();
         }
         return id;
     }
@@ -83,36 +112,23 @@
         return text;
     }
 
-
-    function finalizeCurrentPage() {
-        if (!state.currentPage) return;
-        var durationMs = Date.now() - state.currentPage.enteredAtMs;
-        var page = {
-            path: state.currentPage.path,
-            title: state.currentPage.title,
-            enteredAt: state.currentPage.enteredAt,
-            leftAt: nowIso(),
-            durationMs: durationMs
-        };
-        state.pendingPages.push(page);
-        state.currentPage = null;
+    function totalSessionDurationMs() {
+        if (!state.entryAt) return 0;
+        return Date.now() - new Date(state.entryAt).getTime();
     }
 
-    function recordPageView() {
-        finalizeCurrentPage();
-        state.maxScrollDepth = 0;
-        state.currentPage = {
-            path: window.location.pathname + window.location.search,
-            title: document.title || "",
-            enteredAt: nowIso(),
-            enteredAtMs: Date.now()
-        };
+    // A bounce is a session where the visitor viewed only one page.
+    function isBounce() {
+        var allPages = state.pendingPages.concat(state.currentPage ? [state.currentPage] : []);
+        var uniquePaths = {};
+        allPages.forEach(function (p) { if (p && p.path) uniquePaths[p.path] = true; });
+        return Object.keys(uniquePaths).length <= 1;
     }
-
 
     function buildPayload(extra) {
         var payload = {
             sessionId: state.sessionId,
+            visitorId: state.visitorId,
             termsAcceptedAt: state.entryAt,
             entryUrl: sessionStorage.getItem("visitorEntryUrl") || window.location.href,
             device: deviceInfo(),
@@ -120,7 +136,9 @@
             pages: state.pendingPages.slice(),
             clicks: state.pendingClicks.slice(),
             comments: state.pendingComments.slice(),
-            scrollDepth: state.maxScrollDepth
+            scrollDepth: state.maxScrollDepth,
+            totalSessionDurationMs: totalSessionDurationMs(),
+            isBounce: isBounce()
         };
         if (extra) {
             for (var key in extra) {
@@ -136,6 +154,11 @@
         var url = apiBase() + path;
         if (!apiBase()) return Promise.resolve();
 
+        var headers = {
+            "Content-Type": "application/json",
+            "X-API-Key": apiKey()
+        };
+
         if (useBeacon && navigator.sendBeacon) {
             var beaconUrl = url + "?apiKey=" + encodeURIComponent(apiKey());
             var blob = new Blob([JSON.stringify(body)], { type: "application/json" });
@@ -145,12 +168,9 @@
 
         return fetch(url, {
             method: method,
-            headers: {
-                "Content-Type": "application/json",
-                "X-API-Key": apiKey()
-            },
+            headers: headers,
             body: JSON.stringify(body),
-            keepalive: true
+            keepalive: method === "PATCH" || method === "POST"
         }).catch(function () { });
     }
 
@@ -160,37 +180,41 @@
         state.pendingComments = [];
     }
 
-
     function flush(extra, useBeacon) {
         if (!state.started || !apiBase()) return Promise.resolve();
-
-        
-        if (state.currentPage) {
-            var durationMs = Date.now() - state.currentPage.enteredAtMs;
-            state.pendingPages.push({
-                path: state.currentPage.path,
-                title: state.currentPage.title,
-                enteredAt: state.currentPage.enteredAt,
-                leftAt: nowIso(),
-                durationMs: durationMs
-            });
-            state.currentPage.enteredAtMs = Date.now();
-        }
-
+        finalizeCurrentPageDuration();
         var payload = buildPayload(extra);
-
-        var hasData = payload.pages.length > 0 ||
-            payload.clicks.length > 0 ||
-            payload.comments.length > 0 ||
-            payload.scrollDepth > 0 ||
-            extra;
-
-        if (!hasData) return Promise.resolve();
-
+        if (payload.pages.length === 0 && payload.clicks.length === 0 && payload.comments.length === 0 && !extra) {
+            return Promise.resolve();
+        }
         clearPending();
         return request("PATCH", "/api/sessions/" + encodeURIComponent(state.sessionId), payload, useBeacon);
     }
 
+    function finalizeCurrentPageDuration() {
+        if (!state.currentPage || !state.currentPage.enteredAtMs) return;
+        var durationMs = Date.now() - state.currentPage.enteredAtMs;
+        state.currentPage.durationMs = durationMs;
+        state.currentPage.leftAt = nowIso();
+        var existing = state.pendingPages.filter(function (p) {
+            return p.path === state.currentPage.path && !p.durationMs;
+        });
+        if (existing.length === 0) {
+            state.pendingPages.push(state.currentPage);
+        }
+    }
+
+    function recordPageView() {
+        finalizeCurrentPageDuration();
+        state.maxScrollDepth = 0;
+        state.currentPage = {
+            path: window.location.pathname + window.location.search,
+            title: document.title || "",
+            enteredAt: nowIso(),
+            enteredAtMs: Date.now(),
+            durationMs: 0
+        };
+    }
 
     function onClick(event) {
         if (!state.started) return;
@@ -219,76 +243,73 @@
         if (depth > state.maxScrollDepth) state.maxScrollDepth = depth;
     }
 
-
-    function hookCommentForms() {
-        document.addEventListener("click", function (e) {
-            var btn = e.target;
-            if (!btn) return;
-            var isCommentBtn = btn.id === "commentBtn" ||
-                (btn.closest && btn.closest(".comment-box") && btn.tagName === "BUTTON");
-            if (!isCommentBtn) return;
-
-            var box = btn.closest(".comment-box") || document;
-            var input = box.querySelector("#commentInput") || box.querySelector("input[type='text']");
-            var text = input ? (input.value || "").trim() : "";
-            if (!text) return;
-
-            state.pendingComments.push({
-                path: window.location.pathname,
-                text: text.slice(0, 1000),
-                at: nowIso()
-            });
-
-            flush();
-        }, true);
+    function submitComment() {
+        var input = document.getElementById("commentInput");
+        if (!input) return;
+        var text = (input.value || "").trim();
+        if (!text) return;
+        state.pendingComments.push({
+            path: window.location.pathname,
+            text: text,
+            at: nowIso()
+        });
+        input.value = "";
+        // Flush immediately so the comment isn't lost if the user leaves right after
+        flush();
     }
 
+    function bindCommentBox() {
+        var btn = document.getElementById("commentBtn");
+        var input = document.getElementById("commentInput");
+        if (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                submitComment();
+            });
+        }
+        if (input) {
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    submitComment();
+                }
+            });
+        }
+    }
 
     function onExit(useBeacon) {
         if (!state.started) return;
-
-        var exitAt = nowIso();
-        var entryAt = new Date(state.entryAt).getTime();
-        var totalMs = Date.now() - entryAt;
-
-        var pages = state.pendingPages.slice();
-        if (state.currentPage) {
-            pages.push({
-                path: state.currentPage.path,
-                title: state.currentPage.title,
-                enteredAt: state.currentPage.enteredAt,
-                leftAt: exitAt,
-                durationMs: Date.now() - state.currentPage.enteredAtMs
-            });
-        }
-
+        finalizeCurrentPageDuration();
         var exitPayload = {
             sessionId: state.sessionId,
-            exitAt: exitAt,
+            visitorId: state.visitorId,
+            exitAt: nowIso(),
             exitUrl: window.location.href,
-            totalSessionDurationMs: totalMs,
-            isBounce: pages.length <= 1,
-            pages: pages,
+            totalSessionDurationMs: totalSessionDurationMs(),
+            isBounce: isBounce(),
+            pages: state.currentPage ? [state.currentPage] : [],
             clicks: state.pendingClicks.slice(),
             comments: state.pendingComments.slice(),
             scrollDepth: state.maxScrollDepth
         };
-
         state.pendingClicks = [];
         state.pendingComments = [];
-        state.pendingPages = [];
-
-        var flushUrl = apiBase() + "/api/sessions/" + encodeURIComponent(state.sessionId) +
-            "/flush?apiKey=" + encodeURIComponent(apiKey());
-
-        if (useBeacon && navigator.sendBeacon) {
-            var blob = new Blob([JSON.stringify(exitPayload)], { type: "application/json" });
-            navigator.sendBeacon(flushUrl, blob);
-        } else {
-            request("POST", "/api/sessions/" + encodeURIComponent(state.sessionId) + "/flush", exitPayload, false);
+        if (useBeacon) {
+            var beaconUrl = apiBase() + "/api/sessions/" + encodeURIComponent(state.sessionId) +
+                "/flush?apiKey=" + encodeURIComponent(apiKey());
+            if (navigator.sendBeacon) {
+                var blob = new Blob([JSON.stringify(exitPayload)], { type: "application/json" });
+                navigator.sendBeacon(beaconUrl, blob);
+            }
+            return;
         }
+        flush({
+            exitAt: exitPayload.exitAt,
+            exitUrl: exitPayload.exitUrl,
+            totalSessionDurationMs: exitPayload.totalSessionDurationMs,
+            isBounce: exitPayload.isBounce
+        });
     }
-
 
     function startFlushTimer() {
         var interval = config().flushIntervalMs || 8000;
@@ -302,14 +323,14 @@
         if (state.started) return;
         state.started = true;
         state.sessionId = getOrCreateSessionId();
+        state.visitorId = getOrCreateVisitorId();
         state.entryAt = sessionStorage.getItem(ENTRY_AT_KEY) || nowIso();
         sessionStorage.setItem(ENTRY_AT_KEY, state.entryAt);
         sessionStorage.setItem("visitorEntryUrl", window.location.href);
 
         recordPageView();
-        hookCommentForms();
 
-        var payload = buildPayload({ exitAt: null });
+        var payload = buildPayload();
         request("POST", "/api/sessions", payload).then(function () {
             startFlushTimer();
         });
@@ -321,6 +342,7 @@
         document.addEventListener("visibilitychange", function () {
             if (document.visibilityState === "hidden") onExit(true);
         });
+        bindCommentBox();
     }
 
     function enforceConsent() {
