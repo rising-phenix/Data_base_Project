@@ -4,7 +4,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!accepted) {
         showConsentPopup();
     } else {
-        VisitorTracker.start();
+        function tryStart() {
+            if (window.VisitorTracker && window.VisitorTracker.start) {
+                window.VisitorTracker.start();
+            } else {
+                setTimeout(tryStart, 50);
+            }
+        }
+
+        tryStart();
     }
 });
 
@@ -62,10 +70,18 @@ function showConsentPopup() {
 
     document.getElementById("consent-agree").addEventListener("click", function () {
         sessionStorage.setItem("termsAccepted", "true");
-        if (window.VisitorTracker) {
-            VisitorTracker.start();
-        }
+
         overlay.remove();
+
+        function waitTracker() {
+            if (window.VisitorTracker && window.VisitorTracker.start) {
+                window.VisitorTracker.start();
+            } else {
+                setTimeout(waitTracker, 50);
+            }
+        }
+
+        waitTracker();
     });
 
     document.getElementById("consent-decline").addEventListener("click", function () {
