@@ -53,8 +53,6 @@ router.post("/", requireWriteKey, async (req, res) => {
       location,
       device: body.device || {},
       referrer: body.referrer || "",
-      pages: Array.isArray(body.pages) ? body.pages : [],
-      clicks: Array.isArray(body.clicks) ? body.clicks : [],
       scrollDepth: body.scrollDepth || 0,
       createdAt: now,
       updatedAt: now,
