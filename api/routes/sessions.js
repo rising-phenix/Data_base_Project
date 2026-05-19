@@ -81,7 +81,8 @@ router.patch("/:sessionId", requireWriteKey, async (req, res) => {
     const existing = await collection.findOne({ sessionId });
     if (!existing) {
       const ip = resolveClientIp(req);
-      const location = await resolveLocation(ip);
+      // const location = await resolveLocation(ip);
+      const location = { country: "", city: "", lat: null, lon: null };
       await collection.insertOne({
         sessionId,
         termsAcceptedAt: body.termsAcceptedAt || now.toISOString(),
