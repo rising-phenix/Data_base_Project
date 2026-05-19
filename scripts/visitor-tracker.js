@@ -83,6 +83,33 @@
         return text;
     }
 
+
+    function finalizeCurrentPage() {
+        if (!state.currentPage) return;
+        var durationMs = Date.now() - state.currentPage.enteredAtMs;
+        var page = {
+            path: state.currentPage.path,
+            title: state.currentPage.title,
+            enteredAt: state.currentPage.enteredAt,
+            leftAt: nowIso(),
+            durationMs: durationMs
+        };
+        state.pendingPages.push(page);
+        state.currentPage = null;
+    }
+
+    function recordPageView() {
+        finalizeCurrentPage();
+        state.maxScrollDepth = 0;
+        state.currentPage = {
+            path: window.location.pathname + window.location.search,
+            title: document.title || "",
+            enteredAt: nowIso(),
+            enteredAtMs: Date.now()
+        };
+    }
+
+
     function buildPayload(extra) {
         var payload = {
             sessionId: state.sessionId,
@@ -109,11 +136,6 @@
         var url = apiBase() + path;
         if (!apiBase()) return Promise.resolve();
 
-        var headers = {
-            "Content-Type": "application/json",
-            "X-API-Key": apiKey()
-        };
-
         if (useBeacon && navigator.sendBeacon) {
             var beaconUrl = url + "?apiKey=" + encodeURIComponent(apiKey());
             var blob = new Blob([JSON.stringify(body)], { type: "application/json" });
@@ -123,9 +145,12 @@
 
         return fetch(url, {
             method: method,
-            headers: headers,
+            headers: {
+                "Content-Type": "application/json",
+                "X-API-Key": apiKey()
+            },
             body: JSON.stringify(body),
-            keepalive: method === "PATCH" || method === "POST"
+            keepalive: true
         }).catch(function () { });
     }
 
@@ -135,41 +160,37 @@
         state.pendingComments = [];
     }
 
+
     function flush(extra, useBeacon) {
         if (!state.started || !apiBase()) return Promise.resolve();
-        finalizeCurrentPageDuration();
-        var payload = buildPayload(extra);
-        if (payload.pages.length === 0 && payload.clicks.length === 0 && payload.comments.length === 0 && !extra) {
-            return Promise.resolve();
+
+        
+        if (state.currentPage) {
+            var durationMs = Date.now() - state.currentPage.enteredAtMs;
+            state.pendingPages.push({
+                path: state.currentPage.path,
+                title: state.currentPage.title,
+                enteredAt: state.currentPage.enteredAt,
+                leftAt: nowIso(),
+                durationMs: durationMs
+            });
+            state.currentPage.enteredAtMs = Date.now();
         }
+
+        var payload = buildPayload(extra);
+
+        var hasData = payload.pages.length > 0 ||
+            payload.clicks.length > 0 ||
+            payload.comments.length > 0 ||
+            payload.scrollDepth > 0 ||
+            extra;
+
+        if (!hasData) return Promise.resolve();
+
         clearPending();
         return request("PATCH", "/api/sessions/" + encodeURIComponent(state.sessionId), payload, useBeacon);
     }
 
-    function finalizeCurrentPageDuration() {
-        if (!state.currentPage || !state.currentPage.enteredAtMs) return;
-        var durationMs = Date.now() - state.currentPage.enteredAtMs;
-        state.currentPage.durationMs = durationMs;
-        state.currentPage.leftAt = nowIso();
-        var existing = state.pendingPages.filter(function (p) {
-            return p.path === state.currentPage.path && !p.durationMs;
-        });
-        if (existing.length === 0) {
-            state.pendingPages.push(state.currentPage);
-        }
-    }
-
-    function recordPageView() {
-        finalizeCurrentPageDuration();
-        state.maxScrollDepth = 0;
-        state.currentPage = {
-            path: window.location.pathname + window.location.search,
-            title: document.title || "",
-            enteredAt: nowIso(),
-            enteredAtMs: Date.now(),
-            durationMs: 0
-        };
-    }
 
     function onClick(event) {
         if (!state.started) return;
@@ -198,14 +219,11 @@
         if (depth > state.maxScrollDepth) state.maxScrollDepth = depth;
     }
 
-    
 
     function hookCommentForms() {
-        
         document.addEventListener("click", function (e) {
             var btn = e.target;
             if (!btn) return;
-            
             var isCommentBtn = btn.id === "commentBtn" ||
                 (btn.closest && btn.closest(".comment-box") && btn.tagName === "BUTTON");
             if (!isCommentBtn) return;
@@ -228,28 +246,49 @@
 
     function onExit(useBeacon) {
         if (!state.started) return;
-        finalizeCurrentPageDuration();
+
+        var exitAt = nowIso();
+        var entryAt = new Date(state.entryAt).getTime();
+        var totalMs = Date.now() - entryAt;
+
+        var pages = state.pendingPages.slice();
+        if (state.currentPage) {
+            pages.push({
+                path: state.currentPage.path,
+                title: state.currentPage.title,
+                enteredAt: state.currentPage.enteredAt,
+                leftAt: exitAt,
+                durationMs: Date.now() - state.currentPage.enteredAtMs
+            });
+        }
+
         var exitPayload = {
             sessionId: state.sessionId,
-            exitAt: nowIso(),
-            pages: state.currentPage ? [state.currentPage] : [],
+            exitAt: exitAt,
+            exitUrl: window.location.href,
+            totalSessionDurationMs: totalMs,
+            isBounce: pages.length <= 1,
+            pages: pages,
             clicks: state.pendingClicks.slice(),
             comments: state.pendingComments.slice(),
             scrollDepth: state.maxScrollDepth
         };
+
         state.pendingClicks = [];
         state.pendingComments = [];
-        if (useBeacon) {
-            var beaconUrl = apiBase() + "/api/sessions/" + encodeURIComponent(state.sessionId) +
-                "/flush?apiKey=" + encodeURIComponent(apiKey());
-            if (navigator.sendBeacon) {
-                var blob = new Blob([JSON.stringify(exitPayload)], { type: "application/json" });
-                navigator.sendBeacon(beaconUrl, blob);
-            }
-            return;
+        state.pendingPages = [];
+
+        var flushUrl = apiBase() + "/api/sessions/" + encodeURIComponent(state.sessionId) +
+            "/flush?apiKey=" + encodeURIComponent(apiKey());
+
+        if (useBeacon && navigator.sendBeacon) {
+            var blob = new Blob([JSON.stringify(exitPayload)], { type: "application/json" });
+            navigator.sendBeacon(flushUrl, blob);
+        } else {
+            request("POST", "/api/sessions/" + encodeURIComponent(state.sessionId) + "/flush", exitPayload, false);
         }
-        flush({ exitAt: exitPayload.exitAt });
     }
+
 
     function startFlushTimer() {
         var interval = config().flushIntervalMs || 8000;
