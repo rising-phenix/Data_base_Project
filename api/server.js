@@ -44,13 +44,15 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
-connectDb()
-  .then(() => {
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Tracker API listening on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("Failed to connect to MongoDB:", err.message);
-    process.exit(1);
+(async () => {
+  try {
+    await connectDb();
+    console.log("MongoDB connected");
+  } catch (err) {
+    console.error("MongoDB failed but server will still start:", err.message);
+  }
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Tracker API listening on port ${PORT}`);
   });
+})();
