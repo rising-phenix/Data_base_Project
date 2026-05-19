@@ -12,6 +12,7 @@
         currentPage: null,
         pendingClicks: [],
         pendingPages: [],
+        pendingComments: [],
         maxScrollDepth: 0,
         flushTimer: null
     };
@@ -49,14 +50,6 @@
             return "../index.html";
         }
         return "index.html";
-    }
-
-    function termsUrl() {
-        var path = window.location.pathname;
-        if (path.indexOf("/blogs/") !== -1 || path.indexOf("/category/") !== -1) {
-            return "../termsandconditions.html";
-        }
-        return "termsandconditions.html";
     }
 
     function getOrCreateSessionId() {
@@ -99,6 +92,7 @@
             referrer: document.referrer || "",
             pages: state.pendingPages.slice(),
             clicks: state.pendingClicks.slice(),
+            comments: state.pendingComments.slice(),
             scrollDepth: state.maxScrollDepth
         };
         if (extra) {
@@ -132,19 +126,20 @@
             headers: headers,
             body: JSON.stringify(body),
             keepalive: method === "PATCH" || method === "POST"
-        }).catch(function () {});
+        }).catch(function () { });
     }
 
     function clearPending() {
         state.pendingClicks = [];
         state.pendingPages = [];
+        state.pendingComments = [];
     }
 
     function flush(extra, useBeacon) {
         if (!state.started || !apiBase()) return Promise.resolve();
         finalizeCurrentPageDuration();
         var payload = buildPayload(extra);
-        if (payload.pages.length === 0 && payload.clicks.length === 0 && !extra) {
+        if (payload.pages.length === 0 && payload.clicks.length === 0 && payload.comments.length === 0 && !extra) {
             return Promise.resolve();
         }
         clearPending();
@@ -203,6 +198,34 @@
         if (depth > state.maxScrollDepth) state.maxScrollDepth = depth;
     }
 
+    
+
+    function hookCommentForms() {
+        
+        document.addEventListener("click", function (e) {
+            var btn = e.target;
+            if (!btn) return;
+            
+            var isCommentBtn = btn.id === "commentBtn" ||
+                (btn.closest && btn.closest(".comment-box") && btn.tagName === "BUTTON");
+            if (!isCommentBtn) return;
+
+            var box = btn.closest(".comment-box") || document;
+            var input = box.querySelector("#commentInput") || box.querySelector("input[type='text']");
+            var text = input ? (input.value || "").trim() : "";
+            if (!text) return;
+
+            state.pendingComments.push({
+                path: window.location.pathname,
+                text: text.slice(0, 1000),
+                at: nowIso()
+            });
+
+            flush();
+        }, true);
+    }
+
+
     function onExit(useBeacon) {
         if (!state.started) return;
         finalizeCurrentPageDuration();
@@ -211,9 +234,11 @@
             exitAt: nowIso(),
             pages: state.currentPage ? [state.currentPage] : [],
             clicks: state.pendingClicks.slice(),
+            comments: state.pendingComments.slice(),
             scrollDepth: state.maxScrollDepth
         };
         state.pendingClicks = [];
+        state.pendingComments = [];
         if (useBeacon) {
             var beaconUrl = apiBase() + "/api/sessions/" + encodeURIComponent(state.sessionId) +
                 "/flush?apiKey=" + encodeURIComponent(apiKey());
@@ -243,6 +268,7 @@
         sessionStorage.setItem("visitorEntryUrl", window.location.href);
 
         recordPageView();
+        hookCommentForms();
 
         var payload = buildPayload({ exitAt: null });
         request("POST", "/api/sessions", payload).then(function () {
