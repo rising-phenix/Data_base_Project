@@ -46,7 +46,7 @@ app.use((err, _req, res, _next) => {
 
 connectDb()
   .then(() => {
-    app.listen(PORT, () => {
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`Tracker API listening on port ${PORT}`);
     });
   })
