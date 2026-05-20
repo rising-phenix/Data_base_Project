@@ -86,9 +86,12 @@ router.post("/", requireWriteKey, async (req, res) => {
       scrollDepth: body.scrollDepth || 0,
       totalSessionDurationMs: body.totalSessionDurationMs || 0,
       isBounce: body.isBounce || false,
+
+      // initialize everything because its mongo you ucan put evertthing in too it ;)
       pages: [],
       clicks: [],
       comments: [],
+
       createdAt: now,
       updatedAt: now,
     };
@@ -106,7 +109,6 @@ router.post("/", requireWriteKey, async (req, res) => {
   }
 });
 
-/* ---------------- SESSION PATCH ---------------- */
 
 router.patch("/:sessionId", requireWriteKey, async (req, res) => {
   try {
@@ -142,16 +144,14 @@ router.patch("/:sessionId", requireWriteKey, async (req, res) => {
       update.$max = { scrollDepth: body.scrollDepth };
     }
 
-    // Pages: tracker sends the full array every flush, so we replace (not append).
-    // This avoids duplicates from repeated periodic flushes.
     const newPages = Array.isArray(body.pages) ? body.pages : [];
-    if (newPages.length) {
-      update.$set.pages = newPages;
-    }
-
-    // Clicks and comments: tracker only sends new ones since last flush, so append.
     const newClicks = Array.isArray(body.clicks) ? body.clicks : [];
     const newComments = Array.isArray(body.comments) ? body.comments : [];
+
+    if (newPages.length) {
+      update.$push = update.$push || {};
+      update.$push.pages = { $each: newPages };
+    }
 
     if (newClicks.length) {
       update.$push = update.$push || {};
@@ -172,7 +172,6 @@ router.patch("/:sessionId", requireWriteKey, async (req, res) => {
   }
 });
 
-/* ---------------- SESSION FLUSH (beacon on exit) ---------------- */
 
 router.post("/:sessionId/flush", requireWriteKey, async (req, res) => {
   try {
@@ -194,18 +193,14 @@ router.post("/:sessionId/flush", requireWriteKey, async (req, res) => {
     if (typeof body.isBounce === "boolean")
       update.$set.isBounce = body.isBounce;
 
-    if (typeof body.scrollDepth === "number") {
-      update.$max = { scrollDepth: body.scrollDepth };
-    }
-
-    // Same as PATCH: pages are a full replacement, clicks/comments are appended.
     const newPages = Array.isArray(body.pages) ? body.pages : [];
-    if (newPages.length) {
-      update.$set.pages = newPages;
-    }
-
     const newClicks = Array.isArray(body.clicks) ? body.clicks : [];
     const newComments = Array.isArray(body.comments) ? body.comments : [];
+
+    if (newPages.length) {
+      update.$push = update.$push || {};
+      update.$push.pages = { $each: newPages };
+    }
 
     if (newClicks.length) {
       update.$push = update.$push || {};
@@ -217,6 +212,10 @@ router.post("/:sessionId/flush", requireWriteKey, async (req, res) => {
       update.$push.comments = { $each: newComments };
     }
 
+    if (typeof body.scrollDepth === "number") {
+      update.$max = { scrollDepth: body.scrollDepth };
+    }
+
     await collection.updateOne({ sessionId }, update, { upsert: true });
 
     res.json({ ok: true, sessionId });
@@ -226,7 +225,6 @@ router.post("/:sessionId/flush", requireWriteKey, async (req, res) => {
   }
 });
 
-/* ---------------- GET ALL SESSIONS ---------------- */
 
 router.get("/", requireReadKey, async (req, res) => {
   try {
@@ -256,7 +254,6 @@ router.get("/", requireReadKey, async (req, res) => {
   }
 });
 
-/* ---------------- GET ONE SESSION ---------------- */
 
 router.get("/:sessionId", requireReadKey, async (req, res) => {
   try {
