@@ -73,8 +73,6 @@
         return id;
     }
 
-    // Persists across sessions in localStorage so the same physical visitor
-    // is recognised on future visits (unlike sessionId which resets each tab).
     function getOrCreateVisitorId() {
         var id;
         try {
@@ -86,7 +84,6 @@
                 localStorage.setItem(VISITOR_ID_KEY, id);
             }
         } catch (e) {
-            // localStorage blocked (private browsing etc.) — fall back to session-scoped id
             id = "visitor-" + getOrCreateSessionId();
         }
         return id;
@@ -117,7 +114,6 @@
         return Date.now() - new Date(state.entryAt).getTime();
     }
 
-    // A bounce is a session where the visitor viewed only one page.
     function isBounce() {
         var allPages = state.pendingPages.concat(state.currentPage ? [state.currentPage] : []);
         var uniquePaths = {};
@@ -126,6 +122,20 @@
     }
 
     function buildPayload(extra) {
+        // Build full pages list: all finalized pages + a live snapshot of the current page.
+        // The snapshot is built fresh here and is NEVER pushed into pendingPages —
+        // that prevents duplicates on repeated flushes.
+        var pagesToSend = state.pendingPages.slice();
+
+        if (state.currentPage && state.currentPage.enteredAt) {
+            pagesToSend.push({
+                path: state.currentPage.path,
+                title: state.currentPage.title,
+                enteredAt: state.currentPage.enteredAt,
+                durationMs: Date.now() - state.currentPage.enteredAtMs
+            });
+        }
+
         var payload = {
             sessionId: state.sessionId,
             visitorId: state.visitorId,
@@ -133,13 +143,14 @@
             entryUrl: sessionStorage.getItem("visitorEntryUrl") || window.location.href,
             device: deviceInfo(),
             referrer: document.referrer || "",
-            pages: state.pendingPages.slice(),
+            pages: pagesToSend,
             clicks: state.pendingClicks.slice(),
             comments: state.pendingComments.slice(),
             scrollDepth: state.maxScrollDepth,
             totalSessionDurationMs: totalSessionDurationMs(),
             isBounce: isBounce()
         };
+
         if (extra) {
             for (var key in extra) {
                 if (Object.prototype.hasOwnProperty.call(extra, key)) {
@@ -176,13 +187,14 @@
 
     function clearPending() {
         state.pendingClicks = [];
-        state.pendingPages = [];
         state.pendingComments = [];
+        // NOTE: pendingPages is intentionally NOT cleared here.
+        // It holds finalized (navigated-away-from) pages for the full session history.
+        // The backend uses $set (replace) on the pages array, not $push.
     }
 
     function flush(extra, useBeacon) {
         if (!state.started || !apiBase()) return Promise.resolve();
-        finalizeCurrentPageDuration();
         var payload = buildPayload(extra);
         if (payload.pages.length === 0 && payload.clicks.length === 0 && payload.comments.length === 0 && !extra) {
             return Promise.resolve();
@@ -192,16 +204,16 @@
     }
 
     function finalizeCurrentPageDuration() {
+        // Called only on actual page navigation — moves the current page into
+        // pendingPages with its final durationMs, then clears currentPage.
         if (!state.currentPage || !state.currentPage.enteredAtMs) return;
-        var durationMs = Date.now() - state.currentPage.enteredAtMs;
-        state.currentPage.durationMs = durationMs;
-        state.currentPage.leftAt = nowIso();
-        var existing = state.pendingPages.filter(function (p) {
-            return p.path === state.currentPage.path && !p.durationMs;
+        state.pendingPages.push({
+            path: state.currentPage.path,
+            title: state.currentPage.title,
+            enteredAt: state.currentPage.enteredAt,
+            durationMs: Date.now() - state.currentPage.enteredAtMs
         });
-        if (existing.length === 0) {
-            state.pendingPages.push(state.currentPage);
-        }
+        state.currentPage = null;
     }
 
     function recordPageView() {
@@ -254,7 +266,6 @@
             at: nowIso()
         });
         input.value = "";
-        // Flush immediately so the comment isn't lost if the user leaves right after
         flush();
     }
 
@@ -279,36 +290,29 @@
 
     function onExit(useBeacon) {
         if (!state.started) return;
+
+        // Finalize current page into pendingPages before building the exit payload.
         finalizeCurrentPageDuration();
-        var exitPayload = {
-            sessionId: state.sessionId,
-            visitorId: state.visitorId,
+
+        var exitPayload = buildPayload({
             exitAt: nowIso(),
             exitUrl: window.location.href,
             totalSessionDurationMs: totalSessionDurationMs(),
-            isBounce: isBounce(),
-            pages: state.currentPage ? [state.currentPage] : [],
-            clicks: state.pendingClicks.slice(),
-            comments: state.pendingComments.slice(),
-            scrollDepth: state.maxScrollDepth
-        };
+            isBounce: isBounce()
+        });
+
         state.pendingClicks = [];
         state.pendingComments = [];
-        if (useBeacon) {
+
+        if (useBeacon && navigator.sendBeacon) {
             var beaconUrl = apiBase() + "/api/sessions/" + encodeURIComponent(state.sessionId) +
                 "/flush?apiKey=" + encodeURIComponent(apiKey());
-            if (navigator.sendBeacon) {
-                var blob = new Blob([JSON.stringify(exitPayload)], { type: "application/json" });
-                navigator.sendBeacon(beaconUrl, blob);
-            }
+            var blob = new Blob([JSON.stringify(exitPayload)], { type: "application/json" });
+            navigator.sendBeacon(beaconUrl, blob);
             return;
         }
-        flush({
-            exitAt: exitPayload.exitAt,
-            exitUrl: exitPayload.exitUrl,
-            totalSessionDurationMs: exitPayload.totalSessionDurationMs,
-            isBounce: exitPayload.isBounce
-        });
+
+        request("PATCH", "/api/sessions/" + encodeURIComponent(state.sessionId), exitPayload, false);
     }
 
     function startFlushTimer() {
