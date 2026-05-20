@@ -87,7 +87,7 @@ router.post("/", requireWriteKey, async (req, res) => {
       totalSessionDurationMs: body.totalSessionDurationMs || 0,
       isBounce: body.isBounce || false,
 
-      // initialize everything because its mongo you ucan put evertthing in too it ;)
+      // initialize everything because its mongo you can put everthing in too it ;)
       pages: [],
       clicks: [],
       comments: [],
@@ -98,9 +98,45 @@ router.post("/", requireWriteKey, async (req, res) => {
 
     await collection.updateOne(
       { sessionId },
-      { $set: doc },
+      {
+        $set: {
+          sessionId,
+          visitorId: body.visitorId || req.cookies?.visitorId || `visitor_${sessionId}`,
+          termsAcceptedAt: body.termsAcceptedAt || now.toISOString(),
+          entryUrl: body.entryUrl || "",
+          exitAt: body.exitAt || null,
+          exitUrl: body.exitUrl || "",
+          ip,
+          location,
+          device: parsedDevice,
+          browser: parsedDevice.browser,
+          os: parsedDevice.os,
+          referrer: body.referrer || "",
+          scrollDepth: body.scrollDepth || 0,
+          totalSessionDurationMs: body.totalSessionDurationMs || 0,
+          isBounce: body.isBounce || false,
+          createdAt: now,
+          updatedAt: now,
+        },
+        $setOnInsert: {
+          pages: [],
+          clicks: [],
+          comments: [],
+        }
+      },
       { upsert: true }
     );
+
+    const initPages = Array.isArray(body.pages) ? body.pages : [];
+    const initClicks = Array.isArray(body.clicks) ? body.clicks : [];
+    const initComments = Array.isArray(body.comments) ? body.comments : [];
+    if (initPages.length || initClicks.length || initComments.length) {
+      const pushUpdate = { $push: {} };
+      if (initPages.length) pushUpdate.$push.pages = { $each: initPages };
+      if (initClicks.length) pushUpdate.$push.clicks = { $each: initClicks };
+      if (initComments.length) pushUpdate.$push.comments = { $each: initComments };
+      await collection.updateOne({ sessionId }, pushUpdate);
+    }
 
     res.status(201).json({ ok: true, sessionId });
   } catch (err) {
