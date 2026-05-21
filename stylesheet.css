@@ -435,8 +435,7 @@ body {
 .socials {
     display: flex;
     gap: 10px;
-    margin-top: 10px;
-    font-size: 1.5rem;
+    margin-top: 15px;
     flex-direction: column;
 }
 
